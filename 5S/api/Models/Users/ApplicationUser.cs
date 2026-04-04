@@ -9,5 +9,7 @@ namespace api.Models.Users
         public Company Company { get; set; }
 
         public string Name { get; set; }
+
+        public string Role { get; set; }
     }
 }
