@@ -1,20 +1,19 @@
-﻿using api.DTOS.Zones;
+using api.DTOS.Companies;
 using api.Helpers.Pagination;
-using api.Models.Zones;
-using api.Services.Interfaces.Zones;
+using api.Services.Interfaces.Companies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace api.Controllers.Zones
+namespace api.Controllers.Companies
 {
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class ZoneController : ControllerBase
+    public class CompanyController : ControllerBase
     {
-        private readonly IZoneService _service;
+        private readonly ICompanyService _service;
 
-        public ZoneController(IZoneService service)
+        public CompanyController(ICompanyService service)
         {
             _service = service;
         }
@@ -34,14 +33,14 @@ namespace api.Controllers.Zones
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> Create(CreateZoneDto dto)
+        public async Task<IActionResult> Create(CreateCompanyDto dto)
         {
             var id = await _service.Create(dto);
             return Ok(new { Id = id });
         }
 
         [HttpPost("update")]
-        public async Task<IActionResult> Update(UpdateZoneDto dto)
+        public async Task<IActionResult> Update(UpdateCompanyDto dto)
         {
             await _service.Update(dto);
             return Ok();

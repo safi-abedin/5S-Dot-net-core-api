@@ -18,8 +18,8 @@ namespace api.Repositories.Base
 
         public IQueryable<T> Query() => _db.AsQueryable();
 
-        public async Task<List<T>> GetAll()
-      => await _db.ToListAsync();
+        public async Task<List<T>> GetAllAsync()
+            => await _db.ToListAsync();
 
         public async Task<T> GetByIdAsync(int id)
             => await _db.FindAsync(id);

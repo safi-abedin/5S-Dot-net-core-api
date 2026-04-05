@@ -1,4 +1,5 @@
 ﻿using api.Services.Interfaces.Users;
+using System.Security.Claims;
 
 namespace api.Services.Base.Users
 {
@@ -10,6 +11,9 @@ namespace api.Services.Base.Users
         {
             _http = http;
         }
+
+        public string Role =>
+                    _http.HttpContext?.User?.FindFirst(ClaimTypes.Role)?.Value;
 
         public int CompanyId =>
             int.Parse(_http.HttpContext.User.FindFirst("CompanyId")?.Value ?? "0");

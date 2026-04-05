@@ -3,9 +3,14 @@ using api.Models.Users;
 using api.Repositories.Base;
 using api.Repositories.Interfaces.Base;
 using api.Services.Base.Auth;
+using api.Services.Base.Checklists;
+using api.Services.Base.Companies;
 using api.Services.Base.Logs;
 using api.Services.Base.Users;
 using api.Services.Base.Zones;
+using api.Services.Interfaces.Auth;
+using api.Services.Interfaces.Checklists;
+using api.Services.Interfaces.Companies;
 using api.Services.Interfaces.Logs;
 using api.Services.Interfaces.Users;
 using api.Services.Interfaces.Zones;
@@ -14,7 +19,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Text.Json.Serialization;
 
 
 namespace api.Extensions
@@ -25,19 +29,21 @@ namespace api.Extensions
             this IServiceCollection services,
             IConfiguration config)
         {
-            // DB
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
 
-            // Identity
             services.AddIdentity<ApplicationUser, IdentityRole<int>>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
-            // JWT
             var key = Encoding.UTF8.GetBytes(config["Jwt:Key"]);
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -49,19 +55,46 @@ namespace api.Extensions
                     };
                 });
 
-            // Repository
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    if (context.Request.Path.StartsWithSegments("/api"))
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return Task.CompletedTask;
+                    }
+
+                    context.Response.Redirect(context.RedirectUri);
+                    return Task.CompletedTask;
+                };
+
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    if (context.Request.Path.StartsWithSegments("/api"))
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        return Task.CompletedTask;
+                    }
+
+                    context.Response.Redirect(context.RedirectUri);
+                    return Task.CompletedTask;
+                };
+            });
+
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
-            // Services (REGISTER ALL HERE)
             services.AddScoped<IZoneService, ZoneService>();
+            services.AddScoped<ICompanyService, CompanyService>();
+            services.AddScoped<IChecklistService, ChecklistService>();
+            services.AddScoped<IChecklistCategoryService, ChecklistCategoryService>();
+            services.AddScoped<IUserManagementService, UserManagementService>();
             services.AddScoped<ILogService, LogService>();
-            services.AddScoped<AuthService>();
+            services.AddScoped<IAuthService, AuthService>();
 
-            // Http Context
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-            // Health Check
             services.AddHealthChecks()
                 .AddDbContextCheck<AppDbContext>();
 

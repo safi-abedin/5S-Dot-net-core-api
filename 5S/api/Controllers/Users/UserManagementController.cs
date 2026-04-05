@@ -1,20 +1,19 @@
-﻿using api.DTOS.Zones;
+using api.DTOS.Users;
 using api.Helpers.Pagination;
-using api.Models.Zones;
-using api.Services.Interfaces.Zones;
+using api.Services.Interfaces.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace api.Controllers.Zones
+namespace api.Controllers.Users
 {
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class ZoneController : ControllerBase
+    public class UserManagementController : ControllerBase
     {
-        private readonly IZoneService _service;
+        private readonly IUserManagementService _service;
 
-        public ZoneController(IZoneService service)
+        public UserManagementController(IUserManagementService service)
         {
             _service = service;
         }
@@ -34,14 +33,14 @@ namespace api.Controllers.Zones
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> Create(CreateZoneDto dto)
+        public async Task<IActionResult> Create(CreateUserDto dto)
         {
             var id = await _service.Create(dto);
             return Ok(new { Id = id });
         }
 
         [HttpPost("update")]
-        public async Task<IActionResult> Update(UpdateZoneDto dto)
+        public async Task<IActionResult> Update(UpdateUserDto dto)
         {
             await _service.Update(dto);
             return Ok();

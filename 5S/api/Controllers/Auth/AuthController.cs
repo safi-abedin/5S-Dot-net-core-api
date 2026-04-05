@@ -1,4 +1,8 @@
-﻿namespace api.Controllers.Auth
+﻿using api.DTOS.Auths;
+using api.Services.Interfaces.Auth;
+using Microsoft.AspNetCore.Mvc;
+
+namespace api.Controllers.Auth
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -16,6 +20,14 @@
         public async Task<IActionResult> Login(LoginRequestDto dto)
         {
             var result = await _service.Login(dto);
+            return Ok(result);
+        }
+
+        // 🔄 REFRESH TOKEN
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken(RefreshTokenRequestDto dto)
+        {
+            var result = await _service.RefreshToken(dto);
             return Ok(result);
         }
 

@@ -4,5 +4,6 @@
     {
         int CompanyId { get; }
         int UserId { get; }
+        string Role { get; }
     }
 }
