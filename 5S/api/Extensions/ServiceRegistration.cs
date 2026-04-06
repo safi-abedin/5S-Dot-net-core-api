@@ -3,12 +3,14 @@ using api.Models.Users;
 using api.Repositories.Base;
 using api.Repositories.Interfaces.Base;
 using api.Services.Base.Auth;
+using api.Services.Base.Audits;
 using api.Services.Base.Checklists;
 using api.Services.Base.Companies;
 using api.Services.Base.Logs;
 using api.Services.Base.Users;
 using api.Services.Base.Zones;
 using api.Services.Interfaces.Auth;
+using api.Services.Interfaces.Audits;
 using api.Services.Interfaces.Checklists;
 using api.Services.Interfaces.Companies;
 using api.Services.Interfaces.Logs;
@@ -84,6 +86,7 @@ namespace api.Extensions
 
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
+            services.AddScoped<IAuditService, AuditService>();
             services.AddScoped<IZoneService, ZoneService>();
             services.AddScoped<ICompanyService, CompanyService>();
             services.AddScoped<IChecklistService, ChecklistService>();

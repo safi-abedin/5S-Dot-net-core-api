@@ -42,6 +42,21 @@ namespace api.Services.Base.Zones
             return await PaginationHelper.CreateAsync(query, request.Page, request.Size);
         }
 
+        public async Task<List<ZoneResponseDto>> GetAllByCompanyId(int companyId)
+        {
+            _logger.LogInformation("Fetching all zones (without pagination) for CompanyId: {CompanyId}", companyId);
+
+            return await _repo.Query()
+                .Where(x => x.CompanyId == companyId)
+                .OrderByDescending(x => x.Id)
+                .Select(x => new ZoneResponseDto
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                })
+                .ToListAsync();
+        }
+
         public async Task<ZoneResponseDto> GetById(int id)
         {
             var companyId = _currentUser.CompanyId;

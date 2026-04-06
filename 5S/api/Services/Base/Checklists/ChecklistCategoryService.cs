@@ -28,7 +28,7 @@ namespace api.Services.Base.Checklists
 
             if (_currentUser.Role != "SuperAdmin")
             {
-                query = query.Where(x => x.CompanyId == companyId || x.CompanyId == null);
+                query = query.Where(x => x.CompanyId == companyId);
             }
 
             return await query

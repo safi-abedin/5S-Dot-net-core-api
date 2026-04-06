@@ -16,6 +16,13 @@ namespace api.Controllers.Checklists
             _service = service;
         }
 
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllWithoutPagination()
+        {
+            var result = await _service.GetAll();
+            return Ok(result);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] PaginationRequest request)
         {
@@ -23,12 +30,7 @@ namespace api.Controllers.Checklists
             return Ok(result);
         }
 
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAllWithoutPagination()
-        {
-            var result = await _service.GetAll();
-            return Ok(result);
-        }
+      
 
         [HttpGet("category/{categoryId}")]
         public async Task<IActionResult> GetByCategoryId(int categoryId)

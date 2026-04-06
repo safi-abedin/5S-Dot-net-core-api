@@ -12,8 +12,6 @@ namespace api.Models.Audits
         public ChecklistItem ChecklistItem { get; set; }
 
         public int Score { get; set; }
-        public string Comment { get; set; }
-
-        public List<string> ImageUrls { get; set; }
+       
     }
 }

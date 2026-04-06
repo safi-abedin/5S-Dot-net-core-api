@@ -1,23 +1,17 @@
-﻿using api.Models.Base;
-
-namespace api.Models.Audits
+namespace api.DTOS.Audits
 {
-    public class Audit : BaseEntity
+    public class AuditResponseDto
     {
+        public int Id { get; set; }
         public int ZoneId { get; set; }
-
         public string AuditorName { get; set; }
         public string AuditeeName { get; set; }
         public string Department { get; set; }
-
-        public DateTime AuditDate { get; set; } = DateTime.UtcNow;
-
+        public DateTime AuditDate { get; set; }
         public decimal TotalScore { get; set; }
         public decimal Percentage { get; set; }
-
         public string Status { get; set; }
-
-        public List<AuditItem> Items { get; set; }
-        public List<FeedBackItem>? FeedBackItems { get; set; }
+        public List<AuditItemDto> Items { get; set; } = new();
+        public List<FeedBackItemDto>? FeedBackItems { get; set; }
     }
 }

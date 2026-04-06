@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using api.Data;
 
@@ -11,9 +12,11 @@ using api.Data;
 namespace api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260406095359_AddFeedbackItem")]
+    partial class AddFeedbackItem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -211,7 +214,7 @@ namespace api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Audits", (string)null);
+                    b.ToTable("Audits");
                 });
 
             modelBuilder.Entity("api.Models.Audits.AuditItem", b =>
@@ -255,7 +258,7 @@ namespace api.Migrations
 
                     b.HasIndex("ChecklistItemId");
 
-                    b.ToTable("AuditItems", (string)null);
+                    b.ToTable("AuditItems");
                 });
 
             modelBuilder.Entity("api.Models.Audits.FeedBackItem", b =>
@@ -303,7 +306,7 @@ namespace api.Migrations
 
                     b.HasIndex("AuditId");
 
-                    b.ToTable("FeedBackItem", (string)null);
+                    b.ToTable("FeedBackItem");
                 });
 
             modelBuilder.Entity("api.Models.Checklists.ChecklistCategory", b =>
@@ -341,7 +344,7 @@ namespace api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ChecklistCategories", (string)null);
+                    b.ToTable("ChecklistCategories");
                 });
 
             modelBuilder.Entity("api.Models.Checklists.ChecklistItem", b =>
@@ -391,7 +394,7 @@ namespace api.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("ChecklistItems", (string)null);
+                    b.ToTable("ChecklistItems");
                 });
 
             modelBuilder.Entity("api.Models.Companies.Company", b =>
@@ -442,7 +445,7 @@ namespace api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Companies", (string)null);
+                    b.ToTable("Companies");
                 });
 
             modelBuilder.Entity("api.Models.Logs.AppLog", b =>
@@ -484,7 +487,7 @@ namespace api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AppLogs", (string)null);
+                    b.ToTable("AppLogs");
                 });
 
             modelBuilder.Entity("api.Models.RedTags.RedTag", b =>
@@ -548,7 +551,7 @@ namespace api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RedTags", (string)null);
+                    b.ToTable("RedTags");
                 });
 
             modelBuilder.Entity("api.Models.Users.ApplicationUser", b =>
@@ -670,7 +673,7 @@ namespace api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Zones", (string)null);
+                    b.ToTable("Zones");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

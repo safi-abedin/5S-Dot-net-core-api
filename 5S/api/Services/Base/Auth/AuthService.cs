@@ -62,7 +62,8 @@ namespace api.Services.Base.Auth
                 RefreshToken = user.RefreshToken,
                 CompanyId = user.CompanyId,
                 Role = user.Role,
-                Username = user.UserName
+                Username = user.UserName,
+                UserId = user.Id
             };
         }
 
@@ -97,7 +98,8 @@ namespace api.Services.Base.Auth
                 RefreshToken = user.RefreshToken,
                 CompanyId = user.CompanyId,
                 Role = user.Role,
-                Username = user.UserName
+                Username = user.UserName,
+                UserId = user.Id
             };
         }
 

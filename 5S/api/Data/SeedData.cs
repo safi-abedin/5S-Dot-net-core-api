@@ -14,7 +14,7 @@ namespace api.Data
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
             // Apply migrations
-            context.Database.Migrate();
+            //context.Database.Migrate();
 
             // 🏢 1. DUMMY COMPANY
             var dummyCompany = await context.Companies.FirstOrDefaultAsync(c => c.CompanyCode == "DUMMY_COMPANY");

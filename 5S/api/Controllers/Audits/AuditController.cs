@@ -1,31 +1,22 @@
-﻿using api.DTOS.Zones;
+using api.DTOS.Audits;
 using api.Helpers.Pagination;
-using api.Models.Zones;
-using api.Services.Interfaces.Zones;
+using api.Services.Interfaces.Audits;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace api.Controllers.Zones
+namespace api.Controllers.Audits
 {
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    public class ZoneController : ControllerBase
+    public class AuditController : ControllerBase
     {
-        private readonly IZoneService _service;
+        private readonly IAuditService _service;
 
-        public ZoneController(IZoneService service)
+        public AuditController(IAuditService service)
         {
             _service = service;
         }
-
-        [HttpGet("company/{companyId}")]
-        public async Task<IActionResult> GetAllByCompanyId(int companyId)
-        {
-            var result = await _service.GetAllByCompanyId(companyId);
-            return Ok(result);
-        }
-
 
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] PaginationRequest request)
@@ -34,7 +25,6 @@ namespace api.Controllers.Zones
             return Ok(result);
         }
 
-       
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -43,14 +33,14 @@ namespace api.Controllers.Zones
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> Create(CreateZoneDto dto)
+        public async Task<IActionResult> Create([FromBody] CreateAuditDto dto)
         {
             var id = await _service.Create(dto);
             return Ok(new { Id = id });
         }
 
         [HttpPost("update")]
-        public async Task<IActionResult> Update(UpdateZoneDto dto)
+        public async Task<IActionResult> Update([FromBody] UpdateAuditDto dto)
         {
             await _service.Update(dto);
             return Ok();
