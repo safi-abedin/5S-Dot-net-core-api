@@ -7,6 +7,7 @@ using api.Services.Base.Audits;
 using api.Services.Base.Checklists;
 using api.Services.Base.Companies;
 using api.Services.Base.Logs;
+using api.Services.Base.RedTags;
 using api.Services.Base.Users;
 using api.Services.Base.Zones;
 using api.Services.Interfaces.Auth;
@@ -14,6 +15,7 @@ using api.Services.Interfaces.Audits;
 using api.Services.Interfaces.Checklists;
 using api.Services.Interfaces.Companies;
 using api.Services.Interfaces.Logs;
+using api.Services.Interfaces.RedTags;
 using api.Services.Interfaces.Users;
 using api.Services.Interfaces.Zones;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -94,6 +96,7 @@ namespace api.Extensions
             services.AddScoped<IUserManagementService, UserManagementService>();
             services.AddScoped<ILogService, LogService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IRedTagService, RedTagService>();
 
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
