@@ -21,43 +21,87 @@ namespace api.Controllers.RedTags
         [HttpGet("company/{companyId}")]
         public async Task<IActionResult> GetAllByCompanyId(int companyId)
         {
-            var result = await _service.GetAllByCompanyId(companyId);
-            return Ok(result);
+            try
+            {
+                var result = await _service.GetAllByCompanyId(companyId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, detail = ex.InnerException?.Message });
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] PaginationRequest request)
         {
-            var result = await _service.GetAll(request);
-            return Ok(result);
+            try
+            {
+                var result = await _service.GetAll(request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, detail = ex.InnerException?.Message });
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var result = await _service.GetById(id);
-            return Ok(result);
+            try
+            {
+                var result = await _service.GetById(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, detail = ex.InnerException?.Message });
+            }
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> Create(CreateRedTagDto dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Create([FromForm] CreateRedTagDto dto)
         {
-            var id = await _service.Create(dto);
-            return Ok(new { Id = id });
+            try
+            {
+                var id = await _service.Create(dto);
+                return Ok(new { Id = id });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, detail = ex.InnerException?.Message });
+            }
         }
 
         [HttpPost("update")]
-        public async Task<IActionResult> Update(UpdateRedTagDto dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Update([FromForm] UpdateRedTagDto dto)
         {
-            await _service.Update(dto);
-            return Ok();
+            try
+            {
+                await _service.Update(dto);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, detail = ex.InnerException?.Message });
+            }
         }
 
         [HttpPost("delete")]
         public async Task<IActionResult> Delete([FromBody] int id)
         {
-            await _service.Delete(id);
-            return Ok();
+            try
+            {
+                await _service.Delete(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, detail = ex.InnerException?.Message });
+            }
         }
     }
 }

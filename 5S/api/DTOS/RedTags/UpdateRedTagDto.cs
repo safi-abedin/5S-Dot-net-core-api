@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 namespace api.DTOS.RedTags
 {
     public class UpdateRedTagDto
@@ -7,7 +9,7 @@ namespace api.DTOS.RedTags
         public string Description { get; set; } = string.Empty;
         public int Quantity { get; set; }
         public string Location { get; set; } = string.Empty;
-        public List<string> PhotoUrl { get; set; } = [];
+        public List<IFormFile>? Photos { get; set; }
         public string ResponsiblePerson { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public DateTime IdentifiedDate { get; set; }

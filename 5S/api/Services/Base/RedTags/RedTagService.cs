@@ -4,6 +4,7 @@ using api.Models.RedTags;
 using api.Repositories.Interfaces.Base;
 using api.Services.Interfaces.RedTags;
 using api.Services.Interfaces.Users;
+using api.Services.Interfaces.Files;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Services.Base.RedTags
@@ -13,15 +14,18 @@ namespace api.Services.Base.RedTags
         private readonly IRepository<RedTag> _repo;
         private readonly ICurrentUserService _currentUser;
         private readonly ILogger<RedTagService> _logger;
+        private readonly IFileStorageService _fileStorage;
 
         public RedTagService(
             IRepository<RedTag> repo,
             ICurrentUserService currentUser,
-            ILogger<RedTagService> logger)
+            ILogger<RedTagService> logger,
+            IFileStorageService fileStorage)
         {
             _repo = repo;
             _currentUser = currentUser;
             _logger = logger;
+            _fileStorage = fileStorage;
         }
 
         public async Task<PagedResponse<RedTagResponseDto>> GetAll(PaginationRequest request)
@@ -44,7 +48,7 @@ namespace api.Services.Base.RedTags
                     IdentifiedDate = x.IdentifiedDate,
                     ClosingDate = x.ClosingDate
                 });
-
+            
             _logger.LogInformation("Fetching red tags for CompanyId: {CompanyId}", companyId);
 
             return await PaginationHelper.CreateAsync(query, request.Page, request.Size);
@@ -109,6 +113,7 @@ namespace api.Services.Base.RedTags
                 throw new Exception("Item name is required");
 
             var companyId = _currentUser.CompanyId;
+            var photoUrls = await _fileStorage.SaveManyAsync(dto.Photos, "red-tags");
 
             var entity = new RedTag
             {
@@ -116,7 +121,7 @@ namespace api.Services.Base.RedTags
                 Description = dto.Description,
                 Quantity = dto.Quantity,
                 Location = dto.Location,
-                PhotoUrl = dto.PhotoUrl,
+                PhotoUrl = photoUrls,
                 ResponsiblePerson = dto.ResponsiblePerson,
                 Status = dto.Status,
                 IdentifiedDate = dto.IdentifiedDate ?? DateTime.UtcNow,
@@ -142,11 +147,13 @@ namespace api.Services.Base.RedTags
             if (redTag == null)
                 throw new Exception("Red tag not found");
 
+            var photoUrls = await _fileStorage.SaveManyAsync(dto.Photos, "red-tags");
+
             redTag.ItemName = dto.ItemName;
             redTag.Description = dto.Description;
             redTag.Quantity = dto.Quantity;
             redTag.Location = dto.Location;
-            redTag.PhotoUrl = dto.PhotoUrl;
+            redTag.PhotoUrl = photoUrls;
             redTag.ResponsiblePerson = dto.ResponsiblePerson;
             redTag.Status = dto.Status;
             redTag.IdentifiedDate = dto.IdentifiedDate;

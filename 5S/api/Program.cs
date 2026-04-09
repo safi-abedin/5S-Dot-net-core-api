@@ -83,6 +83,8 @@ using (var scope = app.Services.CreateScope())
     await SeedData.Initialize(services);
 }
 
+app.UseStaticFiles();
+
 // CORS
 app.UseCors("AllowAll");
 

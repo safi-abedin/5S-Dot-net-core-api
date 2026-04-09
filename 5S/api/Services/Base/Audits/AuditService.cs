@@ -5,6 +5,7 @@ using api.Repositories.Interfaces.Base;
 using api.Services.Interfaces.Audits;
 using api.Services.Interfaces.Users;
 using Microsoft.EntityFrameworkCore;
+using api.Services.Interfaces.Files;
 
 namespace api.Services.Base.Audits
 {
@@ -13,15 +14,18 @@ namespace api.Services.Base.Audits
         private readonly IRepository<Audit> _repo;
         private readonly ICurrentUserService _currentUser;
         private readonly ILogger<AuditService> _logger;
+        private readonly IFileStorageService _fileStorage;
 
         public AuditService(
             IRepository<Audit> repo,
             ICurrentUserService currentUser,
-            ILogger<AuditService> logger)
+            ILogger<AuditService> logger,
+            IFileStorageService fileStorage)
         {
             _repo = repo;
             _currentUser = currentUser;
             _logger = logger;
+            _fileStorage = fileStorage;
         }
 
         public async Task<PagedResponse<AuditResponseDto>> GetAll(PaginationRequest request)
@@ -126,6 +130,17 @@ namespace api.Services.Base.Audits
         {
             var companyId = _currentUser.CompanyId;
 
+            var feedBackItems = dto.FeedBackItems == null
+                ? null
+                : await Task.WhenAll(dto.FeedBackItems.Select(async f => new FeedBackItem
+                {
+                    Comment = f.Comment,
+                    ImageUrls = await _fileStorage.SaveManyAsync(f.Images, "audit-feedback"),
+                    Good = f.Good,
+                    Bad = f.Bad,
+                    CompanyId = companyId
+                }));
+
             var entity = new Audit
             {
                 ZoneId = dto.ZoneId,
@@ -143,14 +158,7 @@ namespace api.Services.Base.Audits
                     Score = i.Score,
                     CompanyId = companyId
                 }).ToList(),
-                FeedBackItems = dto.FeedBackItems?.Select(f => new FeedBackItem
-                {
-                    Comment = f.Comment,
-                    ImageUrls = f.ImageUrls,
-                    Good = f.Good,
-                    Bad = f.Bad,
-                    CompanyId = companyId
-                }).ToList()
+                FeedBackItems = feedBackItems?.ToList()
             };
 
             await _repo.AddAsync(entity);
@@ -215,7 +223,7 @@ namespace api.Services.Base.Audits
                         audit.FeedBackItems.Add(new FeedBackItem
                         {
                             Comment = feedBackItem.Comment,
-                            ImageUrls = feedBackItem.ImageUrls,
+                            ImageUrls = await _fileStorage.SaveManyAsync(feedBackItem.Images, "audit-feedback"),
                             Good = feedBackItem.Good,
                             Bad = feedBackItem.Bad,
                             CompanyId = audit.CompanyId
@@ -225,14 +233,21 @@ namespace api.Services.Base.Audits
             }
             else if (dto.FeedBackItems != null)
             {
-                audit.FeedBackItems = dto.FeedBackItems.Select(feedBackItem => new FeedBackItem
+                var items = new List<FeedBackItem>();
+
+                foreach (var feedBackItem in dto.FeedBackItems)
                 {
-                    Comment = feedBackItem.Comment,
-                    ImageUrls = feedBackItem.ImageUrls,
-                    Good = feedBackItem.Good,
-                    Bad = feedBackItem.Bad,
-                    CompanyId = audit.CompanyId
-                }).ToList();
+                    items.Add(new FeedBackItem
+                    {
+                        Comment = feedBackItem.Comment,
+                        ImageUrls = await _fileStorage.SaveManyAsync(feedBackItem.Images, "audit-feedback"),
+                        Good = feedBackItem.Good,
+                        Bad = feedBackItem.Bad,
+                        CompanyId = audit.CompanyId
+                    });
+                }
+
+                audit.FeedBackItems = items;
             }
 
             _repo.Update(audit);
