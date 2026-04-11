@@ -1,3 +1,5 @@
+using api.Enums;
+
 namespace api.DTOS.RedTags
 {
     public class RedTagResponseDto
@@ -9,8 +11,9 @@ namespace api.DTOS.RedTags
         public string Location { get; set; } = string.Empty;
         public List<string> PhotoUrl { get; set; } = [];
         public string ResponsiblePerson { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
+        public RedTagStatus Status { get; set; }
         public DateTime IdentifiedDate { get; set; }
         public DateTime? ClosingDate { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

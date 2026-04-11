@@ -28,30 +28,88 @@ namespace api.Services.Base.RedTags
             _fileStorage = fileStorage;
         }
 
-        public async Task<PagedResponse<RedTagResponseDto>> GetAll(PaginationRequest request)
+        public async Task<PagedResponse<RedTagResponseDto>> GetAll(RedTagPaginationRequest request)
         {
             var companyId = _currentUser.CompanyId;
 
             var query = _repo.Query()
-                .Where(x => x.CompanyId == companyId)
-                .OrderByDescending(x => x.Id)
-                .Select(x => new RedTagResponseDto
-                {
-                    Id = x.Id,
-                    ItemName = x.ItemName,
-                    Description = x.Description,
-                    Quantity = x.Quantity,
-                    Location = x.Location,
-                    PhotoUrl = x.PhotoUrl,
-                    ResponsiblePerson = x.ResponsiblePerson,
-                    Status = x.Status,
-                    IdentifiedDate = x.IdentifiedDate,
-                    ClosingDate = x.ClosingDate
-                });
-            
+                .Where(x => x.CompanyId == companyId);
+
+            if (!string.IsNullOrWhiteSpace(request.ResponsiblePerson))
+            {
+                query = query.Where(x => x.ResponsiblePerson.Contains(request.ResponsiblePerson));
+            }
+
+            if (request.Status.HasValue)
+            {
+                query = query.Where(x => x.Status == request.Status.Value);
+            }
+
+            if (request.IdentifiedDateFrom.HasValue)
+            {
+                query = query.Where(x => x.IdentifiedDate >= request.IdentifiedDateFrom.Value);
+            }
+
+            if (request.IdentifiedDateTo.HasValue)
+            {
+                query = query.Where(x => x.IdentifiedDate <= request.IdentifiedDateTo.Value);
+            }
+
+            if (request.ClosingDateFrom.HasValue)
+            {
+                query = query.Where(x => x.ClosingDate.HasValue && x.ClosingDate.Value >= request.ClosingDateFrom.Value);
+            }
+
+            if (request.ClosingDateTo.HasValue)
+            {
+                query = query.Where(x => x.ClosingDate.HasValue && x.ClosingDate.Value <= request.ClosingDateTo.Value);
+            }
+
+            if (request.CreatedFrom.HasValue)
+            {
+                query = query.Where(x => x.CreatedAt >= request.CreatedFrom.Value);
+            }
+
+            if (request.CreatedTo.HasValue)
+            {
+                query = query.Where(x => x.CreatedAt <= request.CreatedTo.Value);
+            }
+
+            query = ApplySorting(query, request);
+
+            var projectedQuery = query.Select(x => new RedTagResponseDto
+            {
+                Id = x.Id,
+                ItemName = x.ItemName,
+                Description = x.Description,
+                Quantity = x.Quantity,
+                Location = x.Location,
+                PhotoUrl = x.PhotoUrl,
+                ResponsiblePerson = x.ResponsiblePerson,
+                Status = x.Status,
+                IdentifiedDate = x.IdentifiedDate,
+                ClosingDate = x.ClosingDate,
+                CreatedAt = x.CreatedAt
+            });
+
             _logger.LogInformation("Fetching red tags for CompanyId: {CompanyId}", companyId);
 
-            return await PaginationHelper.CreateAsync(query, request.Page, request.Size);
+            return await PaginationHelper.CreateAsync(projectedQuery, request.Page, request.Size);
+        }
+
+        private static IQueryable<RedTag> ApplySorting(IQueryable<RedTag> query, BasePaginationRequest request)
+        {
+            var descending = !string.Equals(request.SortDirection, "asc", StringComparison.OrdinalIgnoreCase);
+
+            return request.SortBy?.Trim().ToLowerInvariant() switch
+            {
+                "responsibleperson" => descending ? query.OrderByDescending(x => x.ResponsiblePerson) : query.OrderBy(x => x.ResponsiblePerson),
+                "status" => descending ? query.OrderByDescending(x => x.Status) : query.OrderBy(x => x.Status),
+                "identifieddate" => descending ? query.OrderByDescending(x => x.IdentifiedDate) : query.OrderBy(x => x.IdentifiedDate),
+                "closingdate" => descending ? query.OrderByDescending(x => x.ClosingDate) : query.OrderBy(x => x.ClosingDate),
+                "createdat" => descending ? query.OrderByDescending(x => x.CreatedAt) : query.OrderBy(x => x.CreatedAt),
+                _ => query.OrderByDescending(x => x.CreatedAt)
+            };
         }
 
         public async Task<List<RedTagResponseDto>> GetAllByCompanyId(int companyId)
@@ -72,7 +130,8 @@ namespace api.Services.Base.RedTags
                     ResponsiblePerson = x.ResponsiblePerson,
                     Status = x.Status,
                     IdentifiedDate = x.IdentifiedDate,
-                    ClosingDate = x.ClosingDate
+                    ClosingDate = x.ClosingDate,
+                    CreatedAt = x.CreatedAt
                 })
                 .ToListAsync();
         }
@@ -94,7 +153,8 @@ namespace api.Services.Base.RedTags
                     ResponsiblePerson = x.ResponsiblePerson,
                     Status = x.Status,
                     IdentifiedDate = x.IdentifiedDate,
-                    ClosingDate = x.ClosingDate
+                    ClosingDate = x.ClosingDate,
+                    CreatedAt = x.CreatedAt
                 })
                 .FirstOrDefaultAsync();
 

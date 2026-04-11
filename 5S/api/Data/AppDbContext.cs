@@ -27,5 +27,18 @@ namespace api.Data
         public DbSet<RedTag> RedTags { get; set; }
 
         public DbSet<AppLog> AppLogs { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Audit>()
+                .Property(x => x.Status)
+                .HasConversion<string>();
+
+            builder.Entity<RedTag>()
+                .Property(x => x.Status)
+                .HasConversion<string>();
+        }
     }
 }

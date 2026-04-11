@@ -1,3 +1,4 @@
+using api.Enums;
 using Microsoft.AspNetCore.Http;
 
 namespace api.DTOS.RedTags
@@ -11,7 +12,7 @@ namespace api.DTOS.RedTags
         public string Location { get; set; } = string.Empty;
         public List<IFormFile>? Photos { get; set; }
         public string ResponsiblePerson { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
+        public RedTagStatus Status { get; set; }
         public DateTime IdentifiedDate { get; set; }
         public DateTime? ClosingDate { get; set; }
     }

@@ -1,3 +1,5 @@
+using api.Enums;
+
 namespace api.DTOS.Audits
 {
     public class CreateAuditDto
@@ -9,7 +11,7 @@ namespace api.DTOS.Audits
         public DateTime AuditDate { get; set; } = DateTime.UtcNow;
         public decimal TotalScore { get; set; }
         public decimal Percentage { get; set; }
-        public string Status { get; set; }
+        public AuditStatus Status { get; set; }
         public List<AuditItemDto> Items { get; set; } = new();
         public List<FeedBackItemDto>? FeedBackItems { get; set; }
     }

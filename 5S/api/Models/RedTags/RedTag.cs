@@ -1,4 +1,5 @@
-﻿using api.Models.Base;
+﻿using api.Enums;
+using api.Models.Base;
 
 namespace api.Models.RedTags
 {
@@ -13,7 +14,7 @@ namespace api.Models.RedTags
 
         public string ResponsiblePerson { get; set; }
 
-        public string Status { get; set; }
+        public RedTagStatus Status { get; set; }
 
         public DateTime IdentifiedDate { get; set; } = DateTime.UtcNow;
         public DateTime? ClosingDate { get; set; }

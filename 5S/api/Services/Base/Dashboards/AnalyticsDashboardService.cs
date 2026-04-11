@@ -1,4 +1,5 @@
 using api.DTOS.Dashboards;
+using api.Enums;
 using api.Models.Audits;
 using api.Models.RedTags;
 using api.Models.Zones;
@@ -42,18 +43,18 @@ namespace api.Services.Base.Dashboards
             var totalAudits = await auditsQuery.CountAsync();
             var averageAuditPercentage = await auditsQuery.Select(x => (decimal?)x.Percentage).AverageAsync() ?? 0;
             var totalRedTags = await redTagsQuery.CountAsync();
-            var closedRedTags = await redTagsQuery.CountAsync(x => x.ClosingDate != null || (x.Status != null && (x.Status.ToLower().Contains("close") || x.Status.ToLower().Contains("resolve"))));
+            var closedRedTags = await redTagsQuery.CountAsync(x => x.Status == RedTagStatus.Closed || x.ClosingDate != null);
             var openRedTags = totalRedTags - closedRedTags;
 
             var auditStatusBreakdown = await auditsQuery
-                .GroupBy(x => x.Status ?? "Unknown")
-                .Select(g => new DashboardStatusCountDto { Status = g.Key, Count = g.Count() })
+                .GroupBy(x => x.Status)
+                .Select(g => new DashboardStatusCountDto { Status = g.Key.ToString(), Count = g.Count() })
                 .OrderByDescending(x => x.Count)
                 .ToListAsync();
 
             var redTagStatusBreakdown = await redTagsQuery
-                .GroupBy(x => x.Status ?? "Unknown")
-                .Select(g => new DashboardStatusCountDto { Status = g.Key, Count = g.Count() })
+                .GroupBy(x => x.Status)
+                .Select(g => new DashboardStatusCountDto { Status = g.Key.ToString(), Count = g.Count() })
                 .OrderByDescending(x => x.Count)
                 .ToListAsync();
 
@@ -178,13 +179,13 @@ namespace api.Services.Base.Dashboards
                     ZoneId = x.ZoneId,
                     AuditDate = x.AuditDate,
                     Percentage = x.Percentage,
-                    Status = x.Status
+                    Status = x.Status.ToString()
                 })
                 .ToListAsync();
 
             var avgClosureDays = await redTagsQuery
-                .Where(x => x.ClosingDate != null)
-                .Select(x => (decimal?)(x.ClosingDate!.Value - x.IdentifiedDate).TotalDays)
+               .Where(r => r.ClosingDate != null)
+                .Select(r => (double?)EF.Functions.DateDiffDay(r.IdentifiedDate, r.ClosingDate.Value))
                 .AverageAsync();
 
             return new AnalyticsAdvancedDashboardDto
@@ -205,7 +206,7 @@ namespace api.Services.Base.Dashboards
                 ScoreBandInsights = scoreBandInsights,
                 FeedbackSentiment = feedbackSentiment,
                 RecentLowPerformanceAudits = lowPerformanceAudits,
-                AverageRedTagClosureDays = avgClosureDays
+                AverageRedTagClosureDays =(decimal)avgClosureDays
             };
         }
 

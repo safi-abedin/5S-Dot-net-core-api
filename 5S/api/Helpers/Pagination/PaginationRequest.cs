@@ -1,8 +1,6 @@
 ﻿namespace api.Helpers.Pagination
 {
-    public class PaginationRequest
+    public class PaginationRequest : BasePaginationRequest
     {
-        public int Page { get; set; } = 1;
-        public int Size { get; set; } = 10;
     }
 }

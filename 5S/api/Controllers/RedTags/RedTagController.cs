@@ -33,7 +33,7 @@ namespace api.Controllers.RedTags
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] PaginationRequest request)
+        public async Task<IActionResult> GetAll([FromQuery] RedTagPaginationRequest request)
         {
             try
             {

@@ -19,7 +19,7 @@ namespace api.Controllers.Audits
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] PaginationRequest request)
+        public async Task<IActionResult> GetAll([FromQuery] AuditPaginationRequest request)
         {
             try
             {

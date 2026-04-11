@@ -1,4 +1,5 @@
-﻿using api.Models.Base;
+﻿using api.Enums;
+using api.Models.Base;
 
 namespace api.Models.Audits
 {
@@ -15,7 +16,7 @@ namespace api.Models.Audits
         public decimal TotalScore { get; set; }
         public decimal Percentage { get; set; }
 
-        public string Status { get; set; }
+        public AuditStatus Status { get; set; }
 
         public List<AuditItem> Items { get; set; }
         public List<FeedBackItem>? FeedBackItems { get; set; }

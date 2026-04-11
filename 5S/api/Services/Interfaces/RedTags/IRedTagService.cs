@@ -5,7 +5,7 @@ namespace api.Services.Interfaces.RedTags
 {
     public interface IRedTagService
     {
-        Task<PagedResponse<RedTagResponseDto>> GetAll(PaginationRequest request);
+        Task<PagedResponse<RedTagResponseDto>> GetAll(RedTagPaginationRequest request);
         Task<List<RedTagResponseDto>> GetAllByCompanyId(int companyId);
         Task<RedTagResponseDto> GetById(int id);
         Task<int> Create(CreateRedTagDto dto);
