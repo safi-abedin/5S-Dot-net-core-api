@@ -31,7 +31,7 @@ namespace api.Services.Base.Audits
             IWebHostEnvironment environment,
             IHttpContextAccessor httpContextAccessor,
             ILogger<AuditPdfService> logger)
-            : base(companyRepo, currentUser, httpClientFactory)
+            : base(companyRepo, currentUser, httpClientFactory, environment, httpContextAccessor)
         {
             _auditService = auditService;
             _environment = environment;

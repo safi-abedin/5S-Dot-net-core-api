@@ -2,6 +2,8 @@
 using api.Models.Companies;
 using api.Repositories.Interfaces.Base;
 using api.Services.Interfaces.Users;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -15,12 +17,21 @@ namespace api.Helpers.PDF.Base
         private readonly IRepository<Company> _companyRepo;
         private readonly ICurrentUserService _currentUser;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IWebHostEnvironment? _environment;
+        private readonly IHttpContextAccessor? _httpContextAccessor;
 
-        protected BasePDFService(IRepository<Company> companyRepo, ICurrentUserService currentUser, IHttpClientFactory httpClientFactory)
+        protected BasePDFService(
+            IRepository<Company> companyRepo,
+            ICurrentUserService currentUser,
+            IHttpClientFactory httpClientFactory,
+            IWebHostEnvironment? environment = null,
+            IHttpContextAccessor? httpContextAccessor = null)
         {
             _companyRepo = companyRepo;
             _currentUser = currentUser;
             _httpClientFactory = httpClientFactory;
+            _environment = environment;
+            _httpContextAccessor = httpContextAccessor;
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
@@ -52,9 +63,54 @@ namespace api.Helpers.PDF.Base
             if (string.IsNullOrWhiteSpace(url))
                 return null;
 
+            var source = url.Trim();
+
+            if (Uri.TryCreate(source, UriKind.Relative, out _))
+            {
+                var request = _httpContextAccessor?.HttpContext?.Request;
+                if (request != null)
+                    source = $"{request.Scheme}://{request.Host}/{source.TrimStart('/')}";
+            }
+
+            if (Uri.TryCreate(source, UriKind.Absolute, out var absoluteUri) &&
+                (absoluteUri.Scheme == Uri.UriSchemeHttp || absoluteUri.Scheme == Uri.UriSchemeHttps))
+            {
+                try
+                {
+                    var client = _httpClientFactory.CreateClient();
+                    using var request = new HttpRequestMessage(HttpMethod.Get, source);
+                    request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (BasePDFService)");
+                    request.Headers.TryAddWithoutValidation("Accept", "image/*,*/*;q=0.8");
+
+                    using var response = await client.SendAsync(request);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var mediaType = response.Content.Headers.ContentType?.MediaType;
+                        if (mediaType == null || mediaType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                            return await response.Content.ReadAsByteArrayAsync();
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            var relativePath = url;
+            if (Uri.TryCreate(url, UriKind.Absolute, out var uriFromUrl))
+                relativePath = uriFromUrl.AbsolutePath;
+
+            var normalized = relativePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+            var webRoot = !string.IsNullOrWhiteSpace(_environment?.WebRootPath)
+                ? _environment.WebRootPath
+                : Path.Combine(_environment?.ContentRootPath ?? Directory.GetCurrentDirectory(), "wwwroot");
+
+            var fullPath = Path.Combine(webRoot, normalized);
+            if (!File.Exists(fullPath))
+                return null;
+
             try
             {
-                return await _httpClientFactory.CreateClient().GetByteArrayAsync(url);
+                return await File.ReadAllBytesAsync(fullPath);
             }
             catch
             {
