@@ -93,6 +93,7 @@ namespace api.Extensions
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
             services.AddScoped<IAuditService, AuditService>();
+            services.AddScoped<IAuditPdfService, AuditPdfService>();
             services.AddScoped<IZoneService, ZoneService>();
             services.AddScoped<ICompanyService, CompanyService>();
             services.AddScoped<IChecklistService, ChecklistService>();
@@ -105,6 +106,7 @@ namespace api.Extensions
             services.AddScoped<IAuditorDashboardService, AuditorDashboardService>();
             services.AddScoped<IAnalyticsDashboardService, AnalyticsDashboardService>();
 
+            services.AddHttpClient();
             services.AddHttpContextAccessor();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
 

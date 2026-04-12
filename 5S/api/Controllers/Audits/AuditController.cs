@@ -12,10 +12,12 @@ namespace api.Controllers.Audits
     public class AuditController : ControllerBase
     {
         private readonly IAuditService _service;
+        private readonly IAuditPdfService _pdfService;
 
-        public AuditController(IAuditService service)
+        public AuditController(IAuditService service, IAuditPdfService pdfService)
         {
             _service = service;
+            _pdfService = pdfService;
         }
 
         [HttpGet]
@@ -39,6 +41,20 @@ namespace api.Controllers.Audits
             {
                 var result = await _service.GetById(id);
                 return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, detail = ex.InnerException?.Message });
+            }
+        }
+
+        [HttpGet("{id}/pdf")]
+        public async Task<IActionResult> GetPdf(int id)
+        {
+            try
+            {
+                var pdf = await _pdfService.GenerateAsync(id);
+                return File(pdf, "application/pdf", $"audit-{id}.pdf");
             }
             catch (Exception ex)
             {
