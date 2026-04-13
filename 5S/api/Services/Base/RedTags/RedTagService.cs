@@ -1,10 +1,11 @@
 using api.DTOS.RedTags;
+using api.Enums;
 using api.Helpers.Pagination;
 using api.Models.RedTags;
 using api.Repositories.Interfaces.Base;
+using api.Services.Interfaces.Files;
 using api.Services.Interfaces.RedTags;
 using api.Services.Interfaces.Users;
-using api.Services.Interfaces.Files;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Services.Base.RedTags
@@ -186,7 +187,8 @@ namespace api.Services.Base.RedTags
                 Status = dto.Status,
                 IdentifiedDate = dto.IdentifiedDate ?? DateTime.UtcNow,
                 ClosingDate = dto.ClosingDate,
-                CompanyId = companyId
+                CompanyId = companyId ,
+                CreatedBy = _currentUser.UserId
             };
 
             await _repo.AddAsync(entity);
@@ -217,7 +219,12 @@ namespace api.Services.Base.RedTags
             redTag.ResponsiblePerson = dto.ResponsiblePerson;
             redTag.Status = dto.Status;
             redTag.IdentifiedDate = dto.IdentifiedDate;
-            redTag.ClosingDate = dto.ClosingDate;
+
+            redTag.ClosingDate = dto.Status == RedTagStatus.Open
+                ? null
+                : dto.ClosingDate;
+
+            redTag.LastUpdatedAt = DateTime.Now;
 
             _repo.Update(redTag);
             await _repo.SaveAsync();

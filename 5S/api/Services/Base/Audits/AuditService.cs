@@ -251,7 +251,8 @@ namespace api.Services.Base.Audits
                 Status = dto.Status,
                 CompanyId = companyId,
                 Items = items,
-                FeedBackItems = feedBackItems?.ToList()
+                FeedBackItems = feedBackItems?.ToList(),
+                CreatedBy = _currentUser.UserId
             };
 
             await _repo.AddAsync(entity);

@@ -24,9 +24,24 @@ namespace api.DTOS.Dashboards
 
     public class MobileDashboardRecentAuditDto
     {
+        public int id { get; set; }
+
+        public string ZoneName { get; set; } = string.Empty;
+
         public DateTime AuditDate { get; set; }
+
         public string Department { get; set; } = string.Empty;
         public decimal Percentage { get; set; }
+        public string Status { get; set; } = string.Empty;
+    }
+
+    public class MobileDashboardRecentTagDto
+    {
+        public int Id { get; set; }
+        public string ItemName { get; set; } = string.Empty;
+        public string Location { get; set; } = string.Empty;
+        public string ResponsiblePerson { get; set; } = string.Empty;
+        public DateTime IdentifiedDate { get; set; }
         public string Status { get; set; } = string.Empty;
     }
 

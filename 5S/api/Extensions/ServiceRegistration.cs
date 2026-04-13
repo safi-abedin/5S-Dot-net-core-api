@@ -105,6 +105,7 @@ namespace api.Extensions
             services.AddScoped<IFileStorageService, FileStorageService>();
             services.AddScoped<IAuditorDashboardService, AuditorDashboardService>();
             services.AddScoped<IAnalyticsDashboardService, AnalyticsDashboardService>();
+            services.AddScoped<IMobileDashboardService, MobileDashboardService>();
 
             services.AddHttpClient();
             services.AddHttpContextAccessor();
