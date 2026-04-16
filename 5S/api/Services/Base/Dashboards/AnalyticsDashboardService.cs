@@ -206,7 +206,9 @@ namespace api.Services.Base.Dashboards
                 ScoreBandInsights = scoreBandInsights,
                 FeedbackSentiment = feedbackSentiment,
                 RecentLowPerformanceAudits = lowPerformanceAudits,
-                AverageRedTagClosureDays =(decimal)avgClosureDays
+                AverageRedTagClosureDays = avgClosureDays.HasValue
+                                            ? (decimal)avgClosureDays.Value
+                                            : 0,
             };
         }
 

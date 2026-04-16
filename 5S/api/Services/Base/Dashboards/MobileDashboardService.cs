@@ -3,6 +3,7 @@ using api.DTOS.Dashboards;
 using api.Enums;
 using api.Models.Audits;
 using api.Models.RedTags;
+using api.Models.Zones;
 using api.Services.Interfaces.Dashboards;
 using api.Services.Interfaces.Users;
 using Microsoft.EntityFrameworkCore;
@@ -95,20 +96,20 @@ namespace api.Services.Base.Dashboards
             var (from, toExclusive) = ResolveDateRange(days, fromDate, toDate);
 
             return await BuildAuditQuery(userId, companyId, from, toExclusive)
-                 .Join(_db.Zones.AsNoTracking().Where(z => !z.IsDeleted),
+                .Join(_db.Zones.AsNoTracking().Where(z => !z.IsDeleted),
                     a => a.ZoneId,
                     z => z.Id,
-                    (a, z) => new { a, z.Name })
-                .OrderByDescending(x => x.a.AuditDate)
+                    (a, z) => new { Audit = a, ZoneName = z.Name })
+                .OrderByDescending(x => x.Audit.AuditDate)
                 .Take(10)
                 .Select(x => new MobileDashboardRecentAuditDto
                 {
-                    id = x.a.Id,
-                    ZoneName = x.Name,
-                    AuditDate = x.a.AuditDate,
-                    Department = x.a.Department,
-                    Percentage = x.a.Percentage,
-                    Status = x.a.Status.ToString()
+                    Id = x.Audit.Id,
+                    ZoneName = x.ZoneName,
+                    AuditDate = x.Audit.AuditDate,
+                    Department = x.Audit.Department,
+                    Percentage = x.Audit.Percentage,
+                    Status = x.Audit.Status.ToString()
                 })
                 .ToListAsync();
         }
@@ -163,6 +164,33 @@ namespace api.Services.Base.Dashboards
                 .ToListAsync();
         }
 
+        public async Task<List<MobileDashboardZonePerformanceDto>> GetZonePerformance(int? days = 30, DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            var (userId, companyId) = GetScope();
+            var (from, toExclusive) = ResolveDateRange(days, fromDate, toDate);
+
+            return await BuildAuditQuery(userId, companyId, from, toExclusive)
+                .GroupBy(x => x.ZoneId)
+                .Select(g => new
+                {
+                    ZoneId = g.Key,
+                    TotalAudits = g.Count(),
+                    AverageScore = g.Average(x => (decimal?)x.Percentage) ?? 0
+                })
+                .Join(_db.Zones.AsNoTracking().Where(z => !z.IsDeleted),
+                    x => x.ZoneId,
+                    z => z.Id,
+                    (x, z) => new MobileDashboardZonePerformanceDto
+                    {
+                        ZoneId = z.Id,
+                        ZoneName = z.Name,
+                        TotalAudits = x.TotalAudits,
+                        ScorePercentage = x.AverageScore
+                    })
+                .OrderByDescending(x => x.ScorePercentage)
+                .ToListAsync();
+        }
+
         private IQueryable<Audit> BuildAuditQuery(int userId, int companyId, DateTime from, DateTime toExclusive)
         {
             var query = _db.Audits.AsNoTracking()
@@ -180,7 +208,7 @@ namespace api.Services.Base.Dashboards
             var query = _db.RedTags.AsNoTracking()
                 .Where(x => !x.IsDeleted && x.IdentifiedDate >= from && x.IdentifiedDate < toExclusive);
 
-          
+
             if (userId > 0)
                 return query.Where(x => x.CreatedBy == userId);
 

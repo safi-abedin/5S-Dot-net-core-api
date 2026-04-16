@@ -51,6 +51,13 @@ namespace api.Controllers.Dashboards
             return Ok(result);
         }
 
+        [HttpGet("zone-performance")]
+        public async Task<IActionResult> GetZonePerformance([FromQuery] int? days = 30, [FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
+        {
+            var result = await _service.GetZonePerformance(days, fromDate, toDate);
+            return Ok(result);
+        }
+
         [HttpGet("performance")]
         public async Task<IActionResult> GetPerformance([FromQuery] int? days = 30, [FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
         {

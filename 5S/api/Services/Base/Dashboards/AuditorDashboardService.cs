@@ -143,7 +143,9 @@ namespace api.Services.Base.Dashboards
                 TotalRedTags = totalRedTags,
                 OpenRedTags = openRedTags,
                 ClosedRedTags = closedRedTags,
-                AverageRedTagClosureDays = (decimal)avgClosureDays,
+                AverageRedTagClosureDays = avgClosureDays.HasValue
+                                            ? (decimal)avgClosureDays.Value
+                                            : 0,
                 AuditStatusBreakdown = auditStatusBreakdown,
                 MonthlyAuditTrend = monthlyAuditTrend,
                 ZoneInsights = zoneInsights,

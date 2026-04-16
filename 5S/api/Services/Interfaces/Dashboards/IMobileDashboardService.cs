@@ -10,5 +10,6 @@ namespace api.Services.Interfaces.Dashboards
         Task<List<MobileDashboardRecentAuditDto>> GetRecentAudits(int? days = 30, DateTime? fromDate = null, DateTime? toDate = null);
         Task<MobileDashboardPerformanceDto> GetPerformance(int? days = 30, DateTime? fromDate = null, DateTime? toDate = null);
         Task<List<MobileDashboardRecentTagDto>> GetRecentTags(int? days = 30, DateTime? fromDate = null, DateTime? toDate = null);
+        Task<List<MobileDashboardZonePerformanceDto>> GetZonePerformance(int? days = 30, DateTime? fromDate = null, DateTime? toDate = null);
     }
 }
