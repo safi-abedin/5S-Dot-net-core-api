@@ -6,7 +6,7 @@ namespace api.Models.Companies
     {
         public string CompanyName { get; set; }
 
-        public string CompanyAddress { get; set; }
+        public string? CompanyAddress { get; set; }
 
         public string CompanyCode { get; set; } // login key
         public string ContactPerson { get; set; }

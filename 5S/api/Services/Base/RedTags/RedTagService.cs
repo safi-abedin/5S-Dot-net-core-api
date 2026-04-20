@@ -174,7 +174,7 @@ namespace api.Services.Base.RedTags
                 throw new Exception("Item name is required");
 
             var companyId = _currentUser.CompanyId;
-            var photoUrls = await _fileStorage.SaveManyAsync(dto.Photos, "red-tags");
+            var photoUrls = (await _fileStorage.SaveManyAsync(dto.Photos, "red-tags")).Distinct().ToList();
 
             var entity = new RedTag
             {
@@ -209,7 +209,7 @@ namespace api.Services.Base.RedTags
             if (redTag == null)
                 throw new Exception("Red tag not found");
 
-            var photoUrls = await _fileStorage.SaveManyAsync(dto.Photos, "red-tags");
+            var photoUrls = (await _fileStorage.SaveManyAsync(dto.Photos, "red-tags")).Distinct().ToList();
 
             redTag.ItemName = dto.ItemName;
             redTag.Description = dto.Description;

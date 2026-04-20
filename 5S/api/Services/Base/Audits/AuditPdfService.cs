@@ -54,6 +54,7 @@ namespace api.Services.Base.Audits
                     CategoryId = g.Key.ChecklistCatagoryId ?? 0,
                     CategoryName = g.Key.CatagoryName,
                     CategoryOrder = g.Key.CatagoryOrder ?? 0,
+                    AverageScore = g.Average(x => (decimal?)x.Score) ?? 0,
                     Items = g.OrderBy(x => x.Order).ToList()
                 })
                 .OrderBy(x => x.CategoryOrder)
@@ -231,7 +232,11 @@ namespace api.Services.Base.Audits
                         column.Item().PaddingTop(6).Column(categoryColumn =>
                         {
                             categoryColumn.Spacing(6);
-                            categoryColumn.Item().Background(Colors.Blue.Lighten5).Padding(8).Text($"{category.CategoryOrder}. {category.CategoryName}").Bold().FontColor(Colors.Blue.Darken3);
+                            categoryColumn.Item().Background(Colors.Blue.Lighten5).Padding(8).Row(row =>
+                            {
+                                row.RelativeItem().Text($"{category.CategoryOrder}. {category.CategoryName}").Bold().FontColor(Colors.Blue.Darken3);
+                                row.ConstantItem(110).AlignRight().Text($"Avg: {category.AverageScore:0.##}/5").Bold().FontColor(Colors.Blue.Darken3);
+                            });
 
                             categoryColumn.Item().Table(table =>
                             {
@@ -422,6 +427,7 @@ namespace api.Services.Base.Audits
                 {
                     var downloads = feedback.ImageUrls
                         .Where(x => !string.IsNullOrWhiteSpace(x))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
                         .Take(5)
                         .Select(ResolveFeedbackImageAsync)
                         .ToList();
@@ -514,6 +520,7 @@ namespace api.Services.Base.Audits
             public int CategoryId { get; set; }
             public string CategoryName { get; set; } = string.Empty;
             public int CategoryOrder { get; set; }
+            public decimal AverageScore { get; set; }
             public List<AuditItemDto> Items { get; set; } = new();
         }
 

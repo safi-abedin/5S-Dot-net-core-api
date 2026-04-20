@@ -231,13 +231,13 @@ namespace api.Services.Base.Audits
                 : await Task.WhenAll(dto.FeedBackItems.Select(async f => new FeedBackItem
                 {
                     Comment = f.Comment,
-                    ImageUrls = await _fileStorage.SaveManyAsync(f.Images, "audit-feedback"),
+                    ImageUrls = (await _fileStorage.SaveManyAsync(f.Images, "audit-feedback")).Distinct().ToList(),
                     Good = f.Good,
                     Bad = f.Bad,
                     CompanyId = companyId
                 }));
 
-            var (items, totalScore, percentage) = await BuildAuditItemsAndScoresAsync(dto.Items, companyId);
+            var (items, totalScore, percentage) = await BuildAuditItemsAndScoresAsync(dto.Items, companyId, dto.AllOkayCategoriesIdOrIncludeInReport);
 
             var entity = new Audit
             {
@@ -282,7 +282,7 @@ namespace api.Services.Base.Audits
             if (audit == null)
                 throw new Exception("Audit not found");
 
-            var (items, totalScore, percentage) = await BuildAuditItemsAndScoresAsync(dto.Items, audit.CompanyId ?? companyId);
+            var (items, totalScore, percentage) = await BuildAuditItemsAndScoresAsync(dto.Items, audit.CompanyId ?? companyId, dto.AllOkayCategoriesIdOrIncludeInReport);
 
             audit.ZoneId = dto.ZoneId;
             audit.AuditorName = dto.AuditorName;
@@ -314,7 +314,7 @@ namespace api.Services.Base.Audits
                         audit.FeedBackItems.Add(new FeedBackItem
                         {
                             Comment = feedBackItem.Comment,
-                            ImageUrls = await _fileStorage.SaveManyAsync(feedBackItem.Images, "audit-feedback"),
+                            ImageUrls = (await _fileStorage.SaveManyAsync(feedBackItem.Images, "audit-feedback")).Distinct().ToList(),
                             Good = feedBackItem.Good,
                             Bad = feedBackItem.Bad,
                             CompanyId = audit.CompanyId
@@ -331,7 +331,7 @@ namespace api.Services.Base.Audits
                     feedbackItems.Add(new FeedBackItem
                     {
                         Comment = feedBackItem.Comment,
-                        ImageUrls = await _fileStorage.SaveManyAsync(feedBackItem.Images, "audit-feedback"),
+                        ImageUrls = (await _fileStorage.SaveManyAsync(feedBackItem.Images, "audit-feedback")).Distinct().ToList(),
                         Good = feedBackItem.Good,
                         Bad = feedBackItem.Bad,
                         CompanyId = audit.CompanyId
@@ -349,18 +349,24 @@ namespace api.Services.Base.Audits
 
         private async Task<(List<AuditItem> Items, decimal TotalScore, decimal Percentage)> BuildAuditItemsAndScoresAsync(
             IEnumerable<AuditItemDto>? submittedItems,
-            int companyId)
+            int companyId,
+            IEnumerable<int>? includedCategoryIds)
         {
-            var checklistQuery = _checklistRepo.Query().AsNoTracking();
+            var includedCategorySet = (includedCategoryIds ?? [])
+                .Where(x => x > 0)
+                .Distinct()
+                .ToHashSet();
 
-            checklistQuery = checklistQuery.Where(x => x.CompanyId == companyId);
+            if (includedCategorySet.Count == 0)
+                throw new Exception("At least one category must be selected in AllOkayCategoriesIdOrIncludeInReport");
 
-            var checklistItems = await checklistQuery
+            var checklistItems = await _checklistRepo.Query().AsNoTracking()
+                .Where(x => x.CompanyId == companyId && includedCategorySet.Contains(x.CategoryId))
                 .Select(x => new { x.Id, x.CategoryId })
                 .ToListAsync();
 
             if (!checklistItems.Any())
-                throw new Exception("Checklist items not found");
+                throw new Exception("Checklist items not found for selected categories");
 
             var submittedMap = (submittedItems ?? [])
                 .GroupBy(x => x.ChecklistItemId)
@@ -375,14 +381,15 @@ namespace api.Services.Base.Audits
                 })
                 .ToList();
 
-            var categoryScores = normalizedItems
+            var categoryAverages = normalizedItems
                 .GroupBy(x => x.CategoryId)
                 .Select(g => g.Average(x => (decimal)x.Score))
                 .ToList();
 
-            var obtainedScore = categoryScores.Sum();
-            var maxPossibleScore = categoryScores.Count * 5m;
-            var percentage = maxPossibleScore == 0 ? 0 : Math.Round((obtainedScore / maxPossibleScore) * 100m, 2);
+            var sumOfCategoryAverages = categoryAverages.Sum();
+            var totalScore = Math.Round(sumOfCategoryAverages / includedCategorySet.Count, 2);
+
+            var percentage = Math.Round((totalScore / includedCategorySet.Count) * 5m * 100m, 2);
 
             var auditItems = normalizedItems
                 .Select(x => new AuditItem
@@ -393,7 +400,7 @@ namespace api.Services.Base.Audits
                 })
                 .ToList();
 
-            return (auditItems, percentage, percentage);
+            return (auditItems, totalScore, percentage);
         }
 
         public async Task Delete(int id)
