@@ -82,6 +82,7 @@ namespace api.Services.Base.Audits
             });
 
 
+
             return document.GeneratePdf();
         }
 

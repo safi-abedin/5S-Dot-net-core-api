@@ -387,9 +387,12 @@ namespace api.Services.Base.Audits
                 .ToList();
 
             var sumOfCategoryAverages = categoryAverages.Sum();
-            var totalScore = Math.Round(sumOfCategoryAverages / includedCategorySet.Count, 2);
 
-            var percentage = Math.Round((totalScore / includedCategorySet.Count) * 5m * 100m, 2);
+            var totalScore = Math.Round(
+                sumOfCategoryAverages / includedCategorySet.Count, 2);
+
+            var percentage = Math.Round(
+                (totalScore / 5m) * 100m, 2);
 
             var auditItems = normalizedItems
                 .Select(x => new AuditItem
